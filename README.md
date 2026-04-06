@@ -43,6 +43,29 @@ This project doesn't just look at word counts; it extracts **22 sophisticated fe
 
 ---
 
+## ⚙️ How It All Works (The Deep Dive)
+
+This project follows a modern, decoupled architecture that bridges the gap between raw data and a user-friendly interface.
+
+### 1. Data Processing & ML (`main.py`, `model.pkl`, `cv.pkl`)
+* **The Brain:** The `model.pkl` contains a **Random Forest Classifier** trained on the Quora Question Pairs dataset.
+* **The Interpreter:** The `cv.pkl` (CountVectorizer) converts user-inputted text into numerical vectors that the model can understand.
+* **The Engine:** `main.py` isn't just a server; it handles the heavy lifting of **Feature Engineering**—calculating Fuzzy ratios, token similarities, and length differences in real-time.
+
+### 2. The API Layer (`FastAPI`)
+* **Asynchronous Processing:** Uses Python's `async` capabilities to handle multiple prediction requests simultaneously without slowing down.
+* **Automatic Documentation:** FastAPI automatically generates interactive API docs (available at `/docs` when running locally).
+
+### 3. Frontend & UX (`index.html`, `static/`)
+* **Glassmorphism Design:** A modern, semi-transparent UI that uses CSS back-drop filters for a premium feel.
+* **State Management:** Vanilla JavaScript handles the "Predict" button states (Loading... -> Result) without requiring a page refresh (AJAX/Fetch API).
+
+### 4. Portability (`Dockerfile`, `requirements.txt`)
+* **The Blueprint:** The `Dockerfile` ensures that the app runs in the exact same Python 3.9 environment regardless of whether it's on your laptop or a cloud server.
+* **Dependency Management:** `requirements.txt` locks in the versions of libraries like `scikit-learn` and `fuzzywuzzy` to prevent "it works on my machine" bugs.
+
+---
+
 ## 💻 Local Development
 
 If you have **Docker** installed, you can run this entire project with two commands:
