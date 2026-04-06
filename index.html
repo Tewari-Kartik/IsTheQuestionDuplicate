@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplicate Question Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+
+    <main class="container">
+        <header>
+            <div class="status-badge">🟢 Model Online</div>
+            <h1>Duplicate Question Predictor</h1>
+            <p>Powered by Random Forest & Advanced NLP</p>
+        </header>
+
+        <div class="glass-card">
+            <div class="input-group">
+                <label for="q1">Question 1</label>
+                <textarea id="q1" placeholder="e.g., How do I learn Python?"></textarea>
+            </div>
+            
+            <div class="divider">
+                <span>VS</span>
+            </div>
+
+            <div class="input-group">
+                <label for="q2">Question 2</label>
+                <textarea id="q2" placeholder="e.g., What is the best way to study Python?"></textarea>
+            </div>
+
+            <button id="predictBtn" onclick="makePrediction()">
+                <span id="btnText">Analyze Similarity</span>
+                <div id="loader" class="loader hidden"></div>
+            </button>
+        </div>
+
+        <div id="resultCard" class="glass-card result-card hidden">
+            <h2 id="resultTitle">Analyzing...</h2>
+            <p id="resultConfidence"></p>
+        </div>
+    </main>
+
+    <script>
+        async function makePrediction() {
+            const q1 = document.getElementById('q1').value.trim();
+            const q2 = document.getElementById('q2').value.trim();
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const resultCard = document.getElementById('resultCard');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultConfidence = document.getElementById('resultConfidence');
+
+            if (!q1 || !q2) {
+                alert("Please enter both questions!");
+                return;
+            }
+
+            // UI Loading State
+            btnText.classList.add('hidden');
+            loader.classList.remove('hidden');
+            resultCard.classList.remove('hidden');
+            resultCard.classList.remove('duplicate', 'unique');
+            resultTitle.innerText = "Analyzing semantic features...";
+            resultConfidence.innerText = "Processing through Random Forest...";
+
+            try {
+                // 2. UPDATED: Uses relative path so it works inside Docker and in the cloud
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question1: q1, question2: q2 })
+                });
+
+                if (!response.ok) throw new Error("API Error");
+
+                const data = await response.json();
+
+                // UI Success State
+                if (data.is_duplicate === 1) {
+                    resultTitle.innerText = "DUPLICATE FOUND";
+                    resultConfidence.innerText = "These questions have the same core intent.";
+                    resultCard.classList.add('duplicate');
+                } else {
+                    resultTitle.innerText = "NOT DUPLICATE";
+                    resultConfidence.innerText = "These questions ask about different things.";
+                    resultCard.classList.add('unique');
+                }
+            } catch (error) {
+                resultTitle.innerText = "CONNECTION ERROR";
+                resultConfidence.innerText = "Make sure your FastAPI server is running.";
+            } finally {
+                btnText.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
